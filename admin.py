@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 import pandas as pd
 import io
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.state import State, StatesGroup # <-- Добавляем State, StatesGroup
 
 from config import ADMINS
 from db import get_db, MasterClass, Registration
@@ -82,6 +82,10 @@ async def export_registrations(message: Message):
         caption="Выгрузка данных по записям.",
         filename=f"registrations_{datetime.date.today()}.csv"
     )
+
+# Создаем новое состояние для рассылки
+class BroadcastStates(StatesGroup):
+    waiting_for_message = State()
 
 @admin_router.message(Command("broadcast"), IsAdmin())
 async def start_broadcast(message: Message, state: FSMContext):
