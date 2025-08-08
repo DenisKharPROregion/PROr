@@ -25,8 +25,10 @@ async def main():
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher()
 
-    # Регистрация роутеров
+    # Сначала регистрируем обычный роутер
     dp.include_router(router)
+    
+    # Затем регистрируем роутер для админа
     dp.include_router(admin_router)
 
     # Настройка и запуск планировщика задач
