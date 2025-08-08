@@ -16,13 +16,18 @@ class RegistrationStates(StatesGroup):
     waiting_for_full_name = State()
     waiting_for_phone = State()
 
+# handlers.py
+
 @router.message(CommandStart())
 async def start_handler(message: Message):
     await message.answer(
         "Добро пожаловать на регистрацию мастер-классов Форума молодежи СФО 'ПРОрегион'! "
         "Выберите, что вас интересует:",
-        reply_markup=main_menu_keyboard
+        # Было: reply_markup=main_menu_keyboard
+        reply_markup=main_menu_keyboard() # <-- Добавляем скобки
     )
+
+# ... остальной код
 
 @router.callback_query(F.data == "register")
 async def show_master_classes_to_register(callback: CallbackQuery, state: FSMContext):
