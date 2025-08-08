@@ -1,13 +1,15 @@
 # bot.py
 import asyncio
 import logging
+import signal
+import sys
 
 from aiogram import Bot, Dispatcher
 from config import BOT_TOKEN
 from db import init_db
 from handlers import router
 from admin import admin_router
-from scheduler import create_tasks
+from scheduler import setup_scheduler, scheduler
 
 async def main():
     # Инициализация логгирования
@@ -27,12 +29,21 @@ async def main():
     dp.include_router(router)
     dp.include_router(admin_router)
 
-    # Запуск планировщика задач
-    await create_tasks(bot)
-
-    # Запуск бота. dp.run_polling будет блокировать выполнение, пока бот работает.
-    # Если вы хотите использовать webhook, используйте dp.run_webhook
-    await dp.start_polling(bot)
+    # Настройка и запуск планировщика задач
+    setup_scheduler(bot)
+    
+    # Добавление обработчика для корректной остановки
+    loop = asyncio.get_event_loop()
+    loop.add_signal_handler(signal.SIGINT, lambda: sys.exit(0))
+    loop.add_signal_handler(signal.SIGTERM, lambda: sys.exit(0))
+    
+    # Запуск бота
+    try:
+        await dp.start_polling(bot)
+    finally:
+        # Остановка планировщика и закрытие сессии бота
+        scheduler.shutdown()
+        await bot.session.close()
 
 if __name__ == "__main__":
     asyncio.run(main())
