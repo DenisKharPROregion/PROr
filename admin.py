@@ -1,7 +1,7 @@
 # admin.py
 import datetime
 from aiogram import Router, F
-from aiogram.types import Message
+from aiogram.types import Message, Bot # <-- Лучше добавить сюда
 from aiogram.filters import Command
 from sqlalchemy.orm import Session
 import pandas as pd
