@@ -27,7 +27,22 @@ async def start_handler(message: Message):
         reply_markup=main_menu_keyboard() # <-- Добавляем скобки
     )
 
-# ... остальной код
+@router.message(F.text == "Мои записи")
+async def show_my_registrations(message: Message):
+    db = next(get_db())
+    user_registrations = db.query(Registration).filter_by(user_id=message.from_user.id).all()
+    
+    if not user_registrations:
+        await message.answer("У вас пока нет записей на мастер-классы.")
+        return
+
+    response_text = "Ваши записи на мастер-классы:\n\n"
+    for registration in user_registrations:
+        master_class = db.query(MasterClass).get(registration.master_class_id)
+        if master_class:
+            response_text += f"- **{master_class.title}**\n"
+    
+    await message.answer(response_text, reply_markup=main_menu_keyboard())
 
 @router.callback_query(F.data == "register")
 async def show_master_classes_to_register(callback: CallbackQuery, state: FSMContext):
